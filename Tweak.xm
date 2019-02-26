@@ -154,7 +154,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 }
 %end
 
-// NC Clear/Show More/Show Less Buttons (Buggy)
+// NC Clear/Show More/Show Less Buttons
 %hook NCToggleControl
 - (void)layoutSubviews {
   %orig;
@@ -164,6 +164,15 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     [filter setDefaults];
     [[MSHookIvar<UIView *>(self, "_titleLabel") layer] setFilters:[NSArray arrayWithObject:filter]];
     [[MSHookIvar<UIView *>(self, "_glyphView") layer] setFilters:[NSArray arrayWithObject:filter]];
+  }
+}
+- (void)setHighlighted:(BOOL)arg1 {
+  %orig;
+  if (enabled && notifications && arg1 == YES) {
+    MSHookIvar<UIView *>(self, "_overlayMaterialView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.34];
+  }
+  if (enabled && notifications && arg1 == NO) {
+    MSHookIvar<UIView *>(self, "_overlayMaterialView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   }
 }
 %end

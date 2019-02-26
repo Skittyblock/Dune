@@ -1,7 +1,6 @@
 #include "DUNERootListController.h"
 
 #define kTintColor [UIColor colorWithRed:0.09 green:0.12 blue:0.16 alpha:1.0]
-#define kTweetText @"I'm using #SwitcherCC by @Skittyblock to upgrade my app switcher!"
 
 @interface DUNEHeader : UITableViewCell {
   UILabel *label;
