@@ -94,7 +94,11 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     UIColor *blackColor = [UIColor colorWithWhite:0.0 alpha:0.5];
 
     UIView *mainOverlayView = MSHookIvar<UIView *>(self, "_mainOverlayView");
-    [mainOverlayView setBackgroundColor:blackColor];
+
+    // Do Not Disturb fix
+    if (mainOverlayView.backgroundColor != nil) {
+      [mainOverlayView setBackgroundColor:blackColor];
+    }
 
     MTPlatterHeaderContentView *headerContentView = [self _headerContentView];
     [[[headerContentView _titleLabel] layer] setFilters:nil];
@@ -179,7 +183,6 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 
 // Widgets
 %hook WGWidgetPlatterView
-%property (nonatomic, assign) BOOL hasChangeListener;
 - (void)layoutSubviews {
   %orig;
 
@@ -217,7 +220,6 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 
 // Folders
 %hook SBFolderBackgroundView
-%property (nonatomic, assign) BOOL hasChangeListener;
 - (void)layoutSubviews {
   %orig;
 
@@ -245,7 +247,6 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 
 // Dock
 %hook SBWallpaperEffectView
-%property (nonatomic, assign) BOOL hasChangeListener;
 - (void)layoutSubviews {
   %orig;
   if ([self.superview isKindOfClass:%c(SBDockView)]) {
