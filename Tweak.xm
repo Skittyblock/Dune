@@ -6,6 +6,7 @@
 static NSMutableDictionary *settings;
 static BOOL enabled;
 static BOOL notifications;
+static BOOL notification3d;
 static BOOL widgets;
 static BOOL folders;
 static BOOL dock;
@@ -26,12 +27,13 @@ static void refreshPrefs() {
     settings = [NSMutableDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.skitty.dune.plist"];
   }
 
-  enabled = [[settings objectForKey:@"enabled"] boolValue] ? [[settings objectForKey:@"enabled"] boolValue] : YES;
-  notifications = [[settings objectForKey:@"notifications"] boolValue] ? [[settings objectForKey:@"notifications"] boolValue] : YES;
-  widgets = [[settings objectForKey:@"widgets"] boolValue] ? [[settings objectForKey:@"widgets"] boolValue] : YES;
-  folders = [[settings objectForKey:@"folders"] boolValue] ? [[settings objectForKey:@"folders"] boolValue] : YES;
-  dock = [[settings objectForKey:@"dock"] boolValue] ? [[settings objectForKey:@"dock"] boolValue] : YES;
-  keyboard = [[settings objectForKey:@"keyboard"] boolValue] ? [[settings objectForKey:@"keyboard"] boolValue] : NO;
+  enabled = [([settings objectForKey:@"enabled"] ?: @(YES)) boolValue];
+  notifications = [([settings objectForKey:@"notifications"] ?: @(YES)) boolValue];
+  notification3d = [([settings objectForKey:@"notification3d"] ?: @(YES)) boolValue];
+  widgets = [([settings objectForKey:@"widgets"] ?: @(YES)) boolValue];
+  folders = [([settings objectForKey:@"folders"] ?: @(YES)) boolValue];
+  dock = [([settings objectForKey:@"dock"] ?: @(YES)) boolValue];
+  keyboard = [([settings objectForKey:@"keyboard"] ?: @(NO)) boolValue];
 }
 
 static void PreferencesChangedCallback(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
@@ -40,7 +42,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 
 // Widget Hooks
 // Only hooks inside widget (and notification) extension content views to (more or less) change the text white.
-%group Widget
+%group Extension
 %hook UILabel
 - (void)setTextColor:(UIColor *)textColor {
   if (enabled && widgets) {
@@ -70,7 +72,9 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   }
 }
 %end
+%end
 
+%group Invert
 %hook CALayer
 - (void)setFilters:(NSArray *)filters {
   if (enabled && widgets) {
@@ -115,6 +119,15 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     if ([notificationContentView respondsToSelector:@selector(_summaryLabel)]) [[notificationContentView _summaryLabel] setTextColor:whiteColor];
   }
 }
+- (void)setHighlighted:(BOOL)arg1 {
+  %orig;
+  if (enabled && notifications && arg1 == YES) {
+    MSHookIvar<UIView *>(self, "_mainOverlayView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.4];
+  }
+  if (enabled && notifications && arg1 == NO) {
+    MSHookIvar<UIView *>(self, "_mainOverlayView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+  }
+}
 %end
 
 %hook BSUIEmojiLabelView
@@ -133,7 +146,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 - (void)layoutSubviews {
   %orig;
 
-  if (enabled && notifications) {
+  if (enabled && notification3d) {
     UIColor *whiteColor = [UIColor whiteColor];
 
     NCNotificationContentView *notificationContentView = MSHookIvar<NCNotificationContentView *>(self, "_notificationContentView");
@@ -314,9 +327,12 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 
 	if ([(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"]) {
 		if ([[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"]) {
-			if ([[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.widget-extension"]] || [[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.usernotifications.content-extension"]]) {
-        %init(Widget);
+			if (([[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.widget-extension"]] && widgets) || ([[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.usernotifications.content-extension"]] && notification3d)) {
+        %init(Extension);
 			}
+      if ([[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.widget-extension"]] && widgets) {
+        %init(Invert);
+      }
 		}
 	}
 }

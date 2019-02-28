@@ -17,8 +17,6 @@
 		<dict>
 			<key>cell</key>
 			<string>PSGroupCell</string>
-			<!--<key>label</key>
-			<string>Dune</string>-->
 		</dict>
 		<dict>
 			<key>cell</key>
@@ -51,6 +49,20 @@
 			<string>notifications</string>
 			<key>label</key>
 			<string>Notifications</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.skitty.dune</string>
+			<key>PostNotification</key>
+			<string>com.skitty.dune.prefschanged</string>
+			<key>key</key>
+			<string>notification3d</string>
+			<key>label</key>
+			<string>Notification 3D Touch</string>
 		</dict>
 		<dict>
 			<key>cell</key>
