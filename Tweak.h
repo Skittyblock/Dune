@@ -21,6 +21,10 @@
 -(MTPlatterHeaderContentView *)_headerContentView;
 @end
 
+@interface NCNotificationLongLookView : UIView
+@property (nonatomic, readonly) UIView *customContentView;
+@end
+
 @interface BSUIEmojiLabelView : UIView
 @end
 
@@ -34,7 +38,7 @@
 @end
 
 @interface WGWidgetPlatterView : UIView
-@property (nonatomic,readonly) UIButton* showMoreButton;
+@property (nonatomic, readonly) UIButton *showMoreButton;
 -(MTPlatterHeaderContentView *)_headerContentView;
 @end
 
@@ -48,7 +52,7 @@
 @end
 
 @interface SBWallpaperEffectView : UIView
-@property (assign,nonatomic) long long wallpaperStyle;
+@property (nonatomic, assign) long long wallpaperStyle;
 @end
 
 @interface UIKBRenderConfig : UIView
@@ -60,4 +64,23 @@
 -(id)initWithType:(NSString*)type;
 -(id)initWithName:(NSString*)name;
 -(void)setDefaults;
+@end
+
+@interface MTMaterialView : UIView
+@end
+
+@interface UIInterfaceAction : NSObject
+@property (nonatomic, assign) bool enabled;
+@property (nonatomic, assign) UIColor *titleTextColor;
+@end
+
+@interface PLInterfaceActionGroupView : UIView
+@property (nonatomic, readonly) NSArray *actions;
+@end
+
+@interface MTVibrantStylingProvider : NSObject
+@end
+
+@interface MTSystemPlatterMaterialSettings : NSObject
+@property (nonatomic, assign) UIColor *tintColor;
 @end

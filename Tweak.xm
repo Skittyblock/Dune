@@ -39,7 +39,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 }
 
 // Widget Hooks
-// Only hooks inside widget content views to (more or less) change the text white.
+// Only hooks inside widget (and notification) extension content views to (more or less) change the text white.
 %group Widget
 %hook UILabel
 - (void)setTextColor:(UIColor *)textColor {
@@ -128,6 +128,32 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 }
 %end
 
+// Notification 3D Touch
+%hook NCNotificationLongLookView
+- (void)layoutSubviews {
+  %orig;
+
+  if (enabled && notifications) {
+    UIColor *whiteColor = [UIColor whiteColor];
+
+    NCNotificationContentView *notificationContentView = MSHookIvar<NCNotificationContentView *>(self, "_notificationContentView");
+    UIView *mainContentView = MSHookIvar<UIView *>(self, "_mainContentView");
+    NCNotificationContentView *headerContentView = MSHookIvar<NCNotificationContentView *>(self, "_headerContentView");
+    UIView *headerDivider = MSHookIvar<UIView *>(self, "_headerDivider");
+
+    notificationContentView.backgroundColor = [UIColor blackColor];
+    mainContentView.backgroundColor = [UIColor blackColor];
+    self.customContentView.backgroundColor = [UIColor blackColor];
+    headerContentView.backgroundColor = [UIColor blackColor];
+    headerDivider.backgroundColor = [UIColor grayColor];
+
+    [[notificationContentView _secondaryTextView] setTextColor:whiteColor];
+    [[notificationContentView _primaryLabel] setTextColor:whiteColor];
+    [[notificationContentView _primarySubtitleLabel] setTextColor:whiteColor];
+  }
+}
+%end
+
 // Stacked Notifications
 %hook NCNotificationViewControllerView
 - (void)layoutSubviews {
@@ -153,6 +179,15 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   %orig;
   if (enabled && notifications) {
     [[MSHookIvar<UILabel *>(self, "_titleLabel") layer] setFilters:nil];
+    MSHookIvar<UIView *>(self, "_backgroundOverlayView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.44];
+  }
+}
+- (void)setHighlighted:(BOOL)arg1 {
+  %orig;
+  if (enabled && notifications && arg1 == YES) {
+    MSHookIvar<UIView *>(self, "_backgroundOverlayView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.34];
+  }
+  if (enabled && notifications && arg1 == NO) {
     MSHookIvar<UIView *>(self, "_backgroundOverlayView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   }
 }
@@ -279,7 +314,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 
 	if ([(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"]) {
 		if ([[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"]) {
-			if ([[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.widget-extension"]]) {
+			if ([[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.widget-extension"]] || [[[(NSDictionary *)[NSBundle mainBundle].infoDictionary valueForKey:@"NSExtension"] valueForKey:@"NSExtensionPointIdentifier"] isEqualToString:[NSString stringWithFormat:@"com.apple.usernotifications.content-extension"]]) {
         %init(Widget);
 			}
 		}
