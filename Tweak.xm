@@ -8,6 +8,7 @@ static BOOL enabled;
 static BOOL notifications;
 static BOOL notification3d;
 static BOOL widgets;
+static BOOL touch3d;
 static BOOL folders;
 static BOOL dock;
 static BOOL keyboard;
@@ -31,6 +32,7 @@ static void refreshPrefs() {
   notifications = [([settings objectForKey:@"notifications"] ?: @(YES)) boolValue];
   notification3d = [([settings objectForKey:@"notification3d"] ?: @(YES)) boolValue];
   widgets = [([settings objectForKey:@"widgets"] ?: @(YES)) boolValue];
+  touch3d = [([settings objectForKey:@"touch3d"] ?: @(YES)) boolValue];
   folders = [([settings objectForKey:@"folders"] ?: @(YES)) boolValue];
   dock = [([settings objectForKey:@"dock"] ?: @(YES)) boolValue];
   keyboard = [([settings objectForKey:@"keyboard"] ?: @(NO)) boolValue];
@@ -301,6 +303,49 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     if (enabled && dock) {
       self.wallpaperStyle = 14;
     }
+  }
+}
+%end
+
+%hook SBFloatingDockPlatterView
+- (void)layoutSubviews {
+  %orig;
+
+  if (enabled && dock) {
+    _UIBackdropView *backgroundView = MSHookIvar<_UIBackdropView*>(self, "_backgroundView");
+    [backgroundView transitionToStyle:2030];
+  }
+}
+%end
+
+// 3D Touch Menus
+%hook SBUIIconForceTouchWrapperViewController
+- (void)viewDidLayoutSubviews {
+  %orig;
+  if (enabled && touch3d) {
+    for (MTMaterialView *materialView in self.view.subviews) {
+      for (UIView *view in materialView.subviews) {
+        view.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.44];
+      }
+    }
+  }
+}
+%end
+
+%hook SBUIActionView
+- (void)layoutSubviews {
+  %orig;
+  // I know, this is terrible. I was lazy.
+  if ([self.superview.superview.superview.superview.superview.superview.superview.superview isKindOfClass:%c(SBUIIconForceTouchWindow)] && enabled && touch3d) {
+    SBUIActionViewLabel *actionLabel = MSHookIvar<SBUIActionViewLabel*>(self, "_titleLabel");
+    UILabel *label = MSHookIvar<UILabel*>(actionLabel, "_label");
+    UIImageView *imageView = MSHookIvar<UIImageView*>(self, "_imageView");
+
+    label.textColor = [UIColor whiteColor];
+    imageView.tintColor = [UIColor whiteColor];
+
+    [[label layer] setFilters:nil];
+    [[imageView layer] setFilters:nil];
   }
 }
 %end

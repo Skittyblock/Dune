@@ -5,16 +5,16 @@
 #import <UIKit/UIKit.h>
 
 @interface MTPlatterHeaderContentView : UIView
--(UILabel *)_titleLabel;
--(UILabel *)_dateLabel;
+- (UILabel *)_titleLabel;
+- (UILabel *)_dateLabel;
 @end
 
 @interface NCNotificationContentView : UIView
--(UILabel *)_secondaryTextView;
--(UILabel *)_primaryLabel;
--(UILabel *)_primarySubtitleLabel;
--(UILabel *)_secondaryLabel;
--(UILabel *)_summaryLabel;
+- (UILabel *)_secondaryTextView;
+- (UILabel *)_primaryLabel;
+- (UILabel *)_primarySubtitleLabel;
+- (UILabel *)_secondaryLabel;
+- (UILabel *)_summaryLabel;
 @end
 
 @interface NCNotificationShortLookView : UIView
@@ -39,7 +39,7 @@
 
 @interface WGWidgetPlatterView : UIView
 @property (nonatomic, readonly) UIButton *showMoreButton;
--(MTPlatterHeaderContentView *)_headerContentView;
+- (MTPlatterHeaderContentView *)_headerContentView;
 @end
 
 @interface SPUIHeaderBlurView : UIView
@@ -59,11 +59,11 @@
 @end
 
 @interface CAFilter : NSObject
-+(CAFilter*)filterWithType:(NSString*)type;
-+(CAFilter*)filterWithName:(NSString*)name;
--(id)initWithType:(NSString*)type;
--(id)initWithName:(NSString*)name;
--(void)setDefaults;
++ (CAFilter*)filterWithType:(NSString*)type;
++ (CAFilter*)filterWithName:(NSString*)name;
+- (id)initWithType:(NSString*)type;
+- (id)initWithName:(NSString*)name;
+- (void)setDefaults;
 @end
 
 @interface MTMaterialView : UIView
@@ -83,4 +83,17 @@
 
 @interface MTSystemPlatterMaterialSettings : NSObject
 @property (nonatomic, assign) UIColor *tintColor;
+@end
+
+@interface _UIBackdropView : UIView
+- (void)transitionToStyle:(NSInteger)style;
+@end
+
+@interface SBUIIconForceTouchWrapperViewController : UIViewController
+@end
+
+@interface SBUIActionView : UIView
+@end
+
+@interface SBUIActionViewLabel : UILabel
 @end

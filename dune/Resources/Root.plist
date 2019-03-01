@@ -88,6 +88,20 @@
 			<key>PostNotification</key>
 			<string>com.skitty.dune.prefschanged</string>
 			<key>key</key>
+			<string>touch3d</string>
+			<key>label</key>
+			<string>3D Touch Menus</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<true/>
+			<key>defaults</key>
+			<string>com.skitty.dune</string>
+			<key>PostNotification</key>
+			<string>com.skitty.dune.prefschanged</string>
+			<key>key</key>
 			<string>folders</string>
 			<key>label</key>
 			<string>Folders</string>
