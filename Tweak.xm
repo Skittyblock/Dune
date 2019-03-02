@@ -80,9 +80,18 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 %hook CALayer
 - (void)setFilters:(NSArray *)filters {
   if (enabled && widgets) {
-    CAFilter* filter = [CAFilter filterWithName:@"colorInvert"];
-    [filter setDefaults];
-    %orig([NSArray arrayWithObject:filter]);
+    CAFilter *colorInvert = [CAFilter filterWithName:@"colorInvert"];
+    [colorInvert setDefaults];
+    %orig([NSArray arrayWithObject:colorInvert]);
+  } else {
+    %orig;
+  }
+}
+- (void)setCompositingFilter:(CAFilter *)filter {
+  if (enabled && widgets && filter) {
+    CAFilter *colorInvert = [CAFilter filterWithName:@"colorInvert"];
+    [colorInvert setDefaults];
+    %orig(colorInvert);
   } else {
     %orig;
   }
@@ -123,11 +132,15 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 }
 - (void)setHighlighted:(BOOL)arg1 {
   %orig;
-  if (enabled && notifications && arg1 == YES) {
-    MSHookIvar<UIView *>(self, "_mainOverlayView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.4];
-  }
-  if (enabled && notifications && arg1 == NO) {
-    MSHookIvar<UIView *>(self, "_mainOverlayView").backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+  UIView *mainOverlayView = MSHookIvar<UIView *>(self, "_mainOverlayView");
+
+  if (mainOverlayView.backgroundColor != nil) {
+    if (enabled && notifications && arg1 == YES ) {
+      mainOverlayView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.4];
+    }
+    if (enabled && notifications && arg1 == NO) {
+      mainOverlayView.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+    }
   }
 }
 %end
@@ -253,6 +266,24 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     if ([self showMoreButton]) {
       [[[[self showMoreButton] titleLabel] layer] setFilters:nil];
       [[self showMoreButton] setTitleColor:whiteColor forState:UIControlStateNormal];
+    }
+  }
+}
+%end
+
+// Edit Button
+%hook WGShortLookStyleButton
+- (void)layoutSubviews {
+  %orig;
+
+  if (enabled && widgets) {
+    UILabel *titleLabel = MSHookIvar<UILabel*>(self, "_titleLabel");
+    [[titleLabel layer] setFilters:nil];
+    titleLabel.textColor = [UIColor whiteColor];
+
+    MTMaterialView *backgroundView = MSHookIvar<MTMaterialView*>(self, "_backgroundView");
+    for (UIView *view in backgroundView.subviews) {
+      view.backgroundColor = [UIColor colorWithWhite:0.0 alpha:0.44];
     }
   }
 }
