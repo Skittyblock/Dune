@@ -368,15 +368,29 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   %orig;
   // I know, this is terrible. I was lazy.
   if ([self.superview.superview.superview.superview.superview.superview.superview.superview isKindOfClass:%c(SBUIIconForceTouchWindow)] && enabled && touch3d) {
-    SBUIActionViewLabel *actionLabel = MSHookIvar<SBUIActionViewLabel*>(self, "_titleLabel");
-    UILabel *label = MSHookIvar<UILabel*>(actionLabel, "_label");
+    SBUIActionViewLabel *titleLabel = MSHookIvar<SBUIActionViewLabel*>(self, "_titleLabel");
+    SBUIActionViewLabel *subtitleLabel = MSHookIvar<SBUIActionViewLabel*>(self, "_subtitleLabel");
+    UILabel *title = MSHookIvar<UILabel*>(titleLabel, "_label");
+    UILabel *subtitle = nil;
+    if (subtitleLabel) subtitle = MSHookIvar<UILabel*>(subtitleLabel, "_label");
     UIImageView *imageView = MSHookIvar<UIImageView*>(self, "_imageView");
 
-    label.textColor = [UIColor whiteColor];
+    title.textColor = [UIColor whiteColor];
+    if (subtitle) subtitle.textColor = [UIColor whiteColor];
     imageView.tintColor = [UIColor whiteColor];
 
-    [[label layer] setFilters:nil];
+    [[title layer] setFilters:nil];
+    if (subtitle) [[subtitle layer] setFilters:nil];
     [[imageView layer] setFilters:nil];
+  }
+}
+- (void)setHighlighted:(BOOL)arg1 {
+  %orig;
+  if (enabled && touch3d && arg1 == YES) {
+    self.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.1];
+  }
+  if (enabled && touch3d && arg1 == NO) {
+    self.backgroundColor = [UIColor colorWithWhite:1.0 alpha:0.0];
   }
 }
 %end
