@@ -302,19 +302,13 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 static UIDeviceWhiteColor *cc = nil;
 %hook SBFolderBackgroundView
 
-/*does not work anymore:
- 
- -(void)layoutSubviews {
-    %orig;
-    self.backgroundColor = [UIColor colorWithWhite:0 alpha:0.7];
- }
- 
- */
-
 -(UIDeviceWhiteColor *)_tintViewBackgroundColorAtFullAlpha {
-    if (cc) return cc;
-    cc = [[%c(UIDeviceWhiteColor) alloc] initWithCGColor:[UIColor colorWithWhite:0 alpha:0.7].CGColor];
-    return cc;
+    if (enabled && folders) {
+        if (cc) return cc;
+        cc = [[%c(UIDeviceWhiteColor) alloc] initWithCGColor:[UIColor colorWithWhite:0 alpha:0.7].CGColor];
+    	return cc;
+    }
+    else return %orig;
 }
 %end
 
@@ -336,6 +330,12 @@ static UIDeviceWhiteColor *cc = nil;
         [self addSubview:(SBWallpaperEffectView *)self.darkWallView]; // add
     }
     
+    if (enabled && folders) {
+    	[(SBWallpaperEffectView *)self.darkWallView setHidden:NO]; // unhide view
+    }
+    else {
+    	[(SBWallpaperEffectView *)self.darkWallView setHidden:YES]; // hide view
+    }
     %orig;
 }
 %end
