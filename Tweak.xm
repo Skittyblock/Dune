@@ -318,7 +318,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 - (void)setWallpaperBackgroundRect:(CGRect)rect forContents:(CGImageRef)contents withFallbackColor:(CGColorRef)fallbackColor {
   if (enabled && folders) {
   	%orig(CGRectNull, nil, nil);
-    self.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0.7];
+    self.backgroundColor = [UIColor colorWithWhite:0 alpha:0.7];
   } else {
     %orig;
   }
