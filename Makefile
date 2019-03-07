@@ -1,5 +1,7 @@
 include $(THEOS)/makefiles/common.mk
 
+export ARCHS = arm64
+
 TWEAK_NAME = Dune
 Dune_FILES = Tweak.xm
 

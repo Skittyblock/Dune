@@ -299,32 +299,46 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 }
 %end
 
-// Folders
+static UIDeviceWhiteColor *cc = nil;
 %hook SBFolderBackgroundView
-- (void)layoutSubviews {
-  %orig;
 
-  if (enabled && folders) {
-    [[self subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
-    UIVisualEffectView* folderBackgroundView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
-    MSHookIvar<UIVisualEffectView*>(self, "_blurView") = folderBackgroundView;
-    [MSHookIvar<UIVisualEffectView*>(self, "_blurView") setFrame:self.bounds];
-    [self addSubview:folderBackgroundView];
-  }
-}
-%end
-
-%hook SBFolderIconBackgroundView
-- (void)setWallpaperBackgroundRect:(CGRect)rect forContents:(CGImageRef)contents withFallbackColor:(CGColorRef)fallbackColor {
-  if (enabled && folders) {
-  	%orig(CGRectNull, nil, nil);
-    self.backgroundColor = [UIColor colorWithWhite:0 alpha:0.7];
-  } else {
+/*does not work anymore:
+ 
+ -(void)layoutSubviews {
     %orig;
-  }
+    self.backgroundColor = [UIColor colorWithWhite:0 alpha:0.7];
+ }
+ 
+ */
+
+-(UIDeviceWhiteColor *)_tintViewBackgroundColorAtFullAlpha {
+    if (cc) return cc;
+    cc = [[%c(UIDeviceWhiteColor) alloc] initWithCGColor:[UIColor colorWithWhite:0 alpha:0.7].CGColor];
+    return cc;
 }
 %end
 
+// this is the folder icon
+%hook SBFolderIconBackgroundView
+
+// add a new property to keep track of whether we already added this or not
+%property (nonatomic, retain) UIView *darkWallView;
+
+-(void)setWallpaperBackgroundRect:(CGRect)rect forContents:(CGImageRef)cnt withFallbackColor:(CGColorRef)color {
+    
+    if (!self.darkWallView) {
+        
+        // create a new wallpaper effect view. this is a "fake" effect view, meaning there are no real effects, but a cached image of the blurred wallpaper. this makes performance not suck
+        self.darkWallView = (SBWallpaperEffectView *)[[%c(SBWallpaperEffectView) alloc] initWithWallpaperVariant:1];
+        [(SBWallpaperEffectView *)self.darkWallView setStyle:14]; // 14 means "dark tint"
+        [(SBWallpaperEffectView *)self.darkWallView setFrame:self.bounds]; // same size as folder
+        [(SBWallpaperEffectView *)self.darkWallView autorelease]; // ARC is disabled, thus, do this
+        [self addSubview:(SBWallpaperEffectView *)self.darkWallView]; // add
+    }
+    
+    %orig;
+}
+%end
 
 // Dock
 %hook SBWallpaperEffectView

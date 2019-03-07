@@ -49,9 +49,12 @@
 @end
 
 @interface SBFolderIconBackgroundView : UIView
+@property (nonatomic, retain) UIView *darkWallView;
 @end
 
 @interface SBWallpaperEffectView : UIView
+-(id)initWithWallpaperVariant:(long long)variant;
+-(void)setStyle:(long long)style;
 @property (nonatomic, assign) long long wallpaperStyle;
 @end
 
