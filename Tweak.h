@@ -45,14 +45,20 @@
 @interface SPUIHeaderBlurView : UIView
 @end
 
+@interface SBWallpaperEffectView : UIView
+- (id)initWithWallpaperVariant:(long long)variant;
+- (void)setStyle:(long long)style;
+@property (nonatomic, assign) long long wallpaperStyle;
+@end
+
 @interface SBFolderBackgroundView : UIView
 @end
 
-@interface SBFolderIconBackgroundView : UIView
+@interface SBFolderIconImageView : UIImageView
+@property (nonatomic, retain) SBWallpaperEffectView *darkBackgroundView;
 @end
 
-@interface SBWallpaperEffectView : UIView
-@property (nonatomic, assign) long long wallpaperStyle;
+@interface SBFolderIconBackgroundView : UIView
 @end
 
 @interface UIKBRenderConfig : UIView

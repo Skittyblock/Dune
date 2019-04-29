@@ -15,11 +15,9 @@ static BOOL keyboard;
 
 // Preference Updates
 static void refreshPrefs() {
-  [settings release];
-
   CFArrayRef keyList = CFPreferencesCopyKeyList(CFSTR("com.skitty.dune"), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
   if(keyList) {
-    settings = (NSMutableDictionary *)CFPreferencesCopyMultiple(keyList, CFSTR("com.skitty.dune"), kCFPreferencesCurrentUser, kCFPreferencesAnyHost);
+    settings = (NSMutableDictionary *)CFBridgingRelease(CFPreferencesCopyMultiple(keyList, CFSTR("com.skitty.dune"), kCFPreferencesCurrentUser, kCFPreferencesAnyHost));
     CFRelease(keyList);
   } else {
     settings = nil;
@@ -315,16 +313,35 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 %end
 
 %hook SBFolderIconBackgroundView
-- (void)setWallpaperBackgroundRect:(CGRect)rect forContents:(CGImageRef)contents withFallbackColor:(CGColorRef)fallbackColor {
-  if (enabled && folders) {
-  	%orig(CGRectNull, nil, nil);
-    self.backgroundColor = [UIColor colorWithWhite:0.1 alpha:0.7];
+- (void)setWallpaperBackgroundRect:(CGRect)rect forContents:(CGImageRef)cnt withFallbackColor:(CGColorRef)color {
+  if (enabled && folders && ![self.superview isKindOfClass:%c(SBActivatorIconView)]) {
+    %orig(CGRectNull, nil, nil);
   } else {
     %orig;
   }
 }
+// took me way too long to figure out this method was making springboard crash
+- (void)didAddSubview:(id)arg1 {
+  return;
+}
 %end
 
+// Thanks Jake!
+%hook SBFolderIconImageView
+%property (nonatomic, retain) SBWallpaperEffectView *darkBackgroundView;
+- (void)layoutSubviews {
+  %orig;
+
+  if (enabled && folders && !self.darkBackgroundView) {
+    self.darkBackgroundView = [[%c(SBWallpaperEffectView) alloc] initWithWallpaperVariant:1];
+    [self.darkBackgroundView setStyle:14];
+    [self.darkBackgroundView setFrame:MSHookIvar<UIView*>(self, "_backgroundView").bounds];
+    self.darkBackgroundView.layer.cornerRadius = MSHookIvar<UIView*>(self, "_backgroundView").layer.cornerRadius;
+    self.darkBackgroundView.layer.masksToBounds = MSHookIvar<UIView*>(self, "_backgroundView").layer.masksToBounds;
+    [MSHookIvar<UIView*>(self, "_backgroundView") addSubview:self.darkBackgroundView];
+  }
+}
+%end
 
 // Dock
 %hook SBWallpaperEffectView
