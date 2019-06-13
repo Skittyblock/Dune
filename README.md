@@ -1,2 +1,2 @@
 # Dune
-A free, open-source, macOS Mojave-like dark mode for iOS
+A free, open-source, iOS 13-like dark mode for iOS 11 and 12

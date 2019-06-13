@@ -26,7 +26,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>enabled</string>
 			<key>label</key>
@@ -42,7 +42,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>mode</string>
 			<key>label</key>
@@ -72,7 +72,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>notifications</string>
 			<key>label</key>
@@ -86,7 +86,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>notification3d</string>
 			<key>label</key>
@@ -100,7 +100,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>widgets</string>
 			<key>label</key>
@@ -114,7 +114,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>touch3d</string>
 			<key>label</key>
@@ -128,7 +128,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>folders</string>
 			<key>label</key>
@@ -142,7 +142,7 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>dock</string>
 			<key>label</key>
@@ -156,11 +156,25 @@
 			<key>defaults</key>
 			<string>com.skitty.dune</string>
 			<key>PostNotification</key>
-			<string>com.skitty.dune.prefschanged</string>
+			<string>xyz.skitty.dune.prefschanged</string>
 			<key>key</key>
 			<string>keyboard</string>
 			<key>label</key>
 			<string>Keyboard</string>
+		</dict>
+		<dict>
+			<key>cell</key>
+			<string>PSSwitchCell</string>
+			<key>default</key>
+			<false/>
+			<key>defaults</key>
+			<string>com.skitty.dune</string>
+			<key>PostNotification</key>
+			<string>xyz.skitty.dune.prefschanged</string>
+			<key>key</key>
+			<string>searchbar</string>
+			<key>label</key>
+			<string>Search Bar</string>
 		</dict>
 	</array>
 	<key>title</key>

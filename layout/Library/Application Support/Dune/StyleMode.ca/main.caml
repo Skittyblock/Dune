@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<caml xmlns="http://www.apple.com/CoreAnimation/1.0">
+  <CALayer allowsEdgeAntialiasing="1" allowsGroupOpacity="1" bounds="0 0 40 40" contentsFormat="RGBA8" name="Root Layer" position="20 20">
+    <backgroundColor opacity="0" value="0.6179 0.6179 0.6179"/>
+    <sublayers>
+      <CALayer id="#1" allowsEdgeAntialiasing="1" allowsGroupOpacity="1" backgroundColor="0 0 0" bounds="0 0 26 26" contentsFormat="RGBA8" cornerRadius="13" name="outer" position="20 20" shouldRasterize="0" transform="">
+	<filters>
+	  <CAFilter filter="colorAdd" name="colorAdd" inputColor="0 0 0"/>
+	</filters>
+	<sublayers>
+	  <CALayer id="#2" allowsEdgeAntialiasing="1" allowsGroupOpacity="1" backgroundColor="0 0 0" bounds="0 0 22 22" contentsFormat="RGBA8" cornerRadius="11" name="inner" position="13 13" transform="">
+	    <compositingFilter type="CAFilter" filter="xor" name="xor"/>
+	    <sublayers>
+	      <CALayer allowsEdgeAntialiasing="1" allowsGroupOpacity="1" backgroundColor="0 0 0" bounds="0 0 20 40" contentsFormat="RGBA8" name="half" position="1 11">
+		<compositingFilter type="CAFilter" filter="subtractS" name="subtractS"/>
+		<scriptComponents/>
+	      </CALayer>
+	    </sublayers>
+	    <scriptComponents/>
+	  </CALayer>
+	  <CALayer id="#3" allowsEdgeAntialiasing="1" allowsGroupOpacity="1" backgroundColor="0 0 0" bounds="0 0 10 10" contentsFormat="RGBA8" cornerRadius="5" name="tiny" position="13 13" transform="">
+	    <compositingFilter type="CAFilter" filter="xor" name="xor"/>
+	    <scriptComponents/>
+	  </CALayer>
+	</sublayers>
+      </CALayer>
+    </sublayers>
+    <states>
+      <LKState name="light"/>
+      <LKState name="dark">
+	<elements>
+	  <LKStateSetValue targetId="#1" keyPath="transform.scale.xy">
+	    <value type="real" value="0.383"/>
+	  </LKStateSetValue>
+	  <LKStateSetValue targetId="#2" keyPath="transform.scale.xy">
+	    <value type="real" value="2.611"/>
+	  </LKStateSetValue>
+	  <LKStateSetValue targetId="#3" keyPath="transform.scale.xy">
+	    <value type="real" value="6.785"/>
+	  </LKStateSetValue>
+	  <LKStateSetValue targetId="#1" keyPath="transform.rotation.z">
+	    <value type="real" value="3.14159265359"/>
+	  </LKStateSetValue>
+	  <LKStateSetValue targetId="#1" keyPath="filters.colorAdd.inputColor">
+	    <value type="CGColor" value="1 1 1"/>
+	  </LKStateSetValue>
+	</elements>
+      </LKState>
+    </states>
+    <stateTransitions>
+      <LKStateTransition fromState="*" toState="dark">
+	<elements>
+	  <LKStateTransitionElement key="transform.scale.xy" targetId="#3">
+	    <animation type="CASpringAnimation" damping="9.279812539147" mass="1" stiffness="21.528730190429" keyPath="transform.scale.xy" beginTime="0" duration="1.99" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="transform.scale.xy" targetId="#2">
+	    <animation type="CASpringAnimation" damping="9.279812539147" mass="1" stiffness="21.528730190429" keyPath="transform.scale.xy" duration="1.99" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="transform.scale.xy" targetId="#1">
+	    <animation type="CASpringAnimation" damping="9.279812539147" mass="1" stiffness="21.528730190429" keyPath="transform.scale.xy" duration="1.99" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="transform.rotation.z" targetId="#1">
+	    <animation type="CASpringAnimation" damping="17.084729029691" mass="1" stiffness="72.97199150449" keyPath="transform.rotation.z" duration="1.99" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="filters.colorAdd.inputColor" targetId="#1">
+	    <animation type="CASpringAnimation" damping="30.778044921505" mass="1" stiffness="236.822012297549" keyPath="filters.colorAdd.inputColor" duration="0.6" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	</elements>
+      </LKStateTransition>
+      <LKStateTransition fromState="dark" toState="*">
+	<elements>
+	  <LKStateTransitionElement key="transform.scale.xy" targetId="#3">
+	    <animation type="CASpringAnimation" damping="12.097341235018" mass="1" stiffness="36.586416239118" keyPath="transform.scale.xy" duration="2.81" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="transform.scale.xy" targetId="#2">
+	    <animation type="CASpringAnimation" damping="13.462778359761" mass="1" stiffness="45.311600291016" keyPath="transform.scale.xy" duration="2.525" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="transform.scale.xy" targetId="#1">
+	    <animation type="CASpringAnimation" damping="15.665220677604" mass="1" stiffness="61.349784719509" keyPath="transform.scale.xy" duration="2.17" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="transform.rotation.z" targetId="#1">
+	    <animation type="CASpringAnimation" damping="17.041346950633" mass="1" stiffness="72.601876472966" keyPath="transform.rotation.z" duration="1.995" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	  <LKStateTransitionElement key="filters.colorAdd.inputColor" targetId="#1">
+	    <animation type="CASpringAnimation" damping="31.299706699836" mass="1" stiffness="244.917909873938" keyPath="filters.colorAdd.inputColor" duration="0.59" fillMode="backwards"/>
+	  </LKStateTransitionElement>
+	</elements>
+      </LKStateTransition>
+    </stateTransitions>
+  </CALayer>
+</caml>

@@ -1,3 +1,4 @@
+TARGET = iphone:clang::11.0
 ARCHS = arm64 arm64e
 
 include $(THEOS)/makefiles/common.mk
@@ -5,7 +6,6 @@ include $(THEOS)/makefiles/common.mk
 BUNDLE_NAME = Dune
 Dune_FILES = DUNERootListController.m
 Dune_INSTALL_PATH = /Library/PreferenceBundles
-Dune_FRAMEWORKS = UIKit
 Dune_PRIVATE_FRAMEWORKS = Preferences
 
 include $(THEOS_MAKE_PATH)/bundle.mk
