@@ -97,10 +97,6 @@ extern "C" {
 @end
 
 @interface SBFolderIconBackgroundView : UIView
-@property (nonatomic, assign) bool isObserving;
-@property (nonatomic, retain) NSArray *wallpaperItems;
-- (void)setWallpaperBackgroundRect:(CGRect)arg1 forContents:(CGImageRef)arg2 withFallbackColor:(CGColorRef)arg3;
-- (void)duneToggled:(id)arg1;
 @end
 
 @interface SBFolderIconView : UIView
@@ -216,9 +212,10 @@ extern "C" {
 
 @interface CCUILabeledRoundButton : UIView
 @property (nonatomic, assign) bool centered;
-@property (nonatomic,copy) NSString *title;
-@property (nonatomic,copy) NSString *subtitle;
+@property (nonatomic, copy) NSString *title;
+@property (nonatomic, copy) NSString *subtitle;
 @property (nonatomic, assign) bool labelsVisible;
+@property (nonatomic, retain) UIImage *glyphImage;
 @property (nonatomic, retain) CCUIRoundButton *buttonView;
 - (id)initWithGlyphImage:(id)arg1 highlightColor:(id)arg2 useLightStyle:(BOOL)arg3;
 - (void)updatePosition;

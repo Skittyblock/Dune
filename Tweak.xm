@@ -18,6 +18,11 @@ static int mode;
 static CGRect ccBounds;
 static BOOL trueTone;
 
+static UIImage *nightImage;
+static UIImage *toneImage;
+
+static NSBundle *localizeBundle = [NSBundle bundleWithPath:@"/Library/Application Support/Dune/Localization.bundle"];
+
 // Toggle Notifications
 static void setDuneEnabled(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   enabled = YES;
@@ -27,6 +32,12 @@ static void setDuneEnabled(CFNotificationCenterRef center, void *observer, CFStr
 static void setDuneDisabled(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   enabled = NO;
   [[NSNotificationCenter defaultCenter] postNotificationName:@"xyz.skitty.dune.update" object:nil userInfo:nil];
+
+  NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
+  if (eclipsePreferences) {
+    [eclipsePreferences setValue:[NSNumber numberWithBool:NO] forKey:@"enabled"];
+    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:TRUE];
+  }
 }
 
 static void duneEnabled() {
@@ -35,6 +46,12 @@ static void duneEnabled() {
 
 static void duneDisabled() {
   CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("xyz.skitty.dune.disabled"), nil, nil, true);
+
+  NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
+  if (eclipsePreferences) {
+    [eclipsePreferences setValue:[NSNumber numberWithBool:NO] forKey:@"enabled"];
+    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:NO];
+  }
 }
 
 // Preference Updates
@@ -85,8 +102,8 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     self.darkTextColor = [UIColor whiteColor];
     self.isObserving = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(duneToggled:) name:@"xyz.skitty.dune.update" object:nil];
+    [self duneToggled:nil];
   }
-  [self duneToggled:nil];
 }
 - (void)setTextColor:(UIColor *)color {
   if (!self.isObserving) {
@@ -435,25 +452,25 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   // Do Not Disturb fix
   if (mainOverlayView.backgroundColor != nil) {
     [mainOverlayView setDarkBackgroundColor:blackColor];
+
+    [[[headerContentView _titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
+    [[[headerContentView _dateLabel] layer] setDarkFilters:[[NSArray alloc] init]];
+    [[headerContentView _titleLabel] setDarkTextColor:whiteColor];
+    [[headerContentView _dateLabel] setDarkTextColor:whiteColor];
+
+    [[notificationContentView _secondaryTextView] setDarkTextColor:whiteColor];
+    [[notificationContentView _primaryLabel] setDarkTextColor:whiteColor];
+    [[notificationContentView _primarySubtitleLabel] setDarkTextColor:whiteColor];
+
+    if ([notificationContentView respondsToSelector:@selector(_secondaryLabel)]) [[notificationContentView _secondaryLabel] setDarkTextColor:whiteColor];
+    if ([notificationContentView respondsToSelector:@selector(_summaryLabel)]) [[notificationContentView _summaryLabel] setDarkTextColor:whiteColor];
   }
-
-  [[[headerContentView _titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
-  [[[headerContentView _dateLabel] layer] setDarkFilters:[[NSArray alloc] init]];
-  [[headerContentView _titleLabel] setDarkTextColor:whiteColor];
-  [[headerContentView _dateLabel] setDarkTextColor:whiteColor];
-
-  [[notificationContentView _secondaryTextView] setDarkTextColor:whiteColor];
-  [[notificationContentView _primaryLabel] setDarkTextColor:whiteColor];
-  [[notificationContentView _primarySubtitleLabel] setDarkTextColor:whiteColor];
-
-  if ([notificationContentView respondsToSelector:@selector(_secondaryLabel)]) [[notificationContentView _secondaryLabel] setDarkTextColor:whiteColor];
-  if ([notificationContentView respondsToSelector:@selector(_summaryLabel)]) [[notificationContentView _summaryLabel] setDarkTextColor:whiteColor];
 
   if ([[[UIDevice currentDevice] systemVersion] compare:@"12.0" options:NSNumericSearch] == NSOrderedAscending) {
     MSHookIvar<UIView *>(MSHookIvar<_UIBackdropView *>(MSHookIvar<UIView *>(self, "_backgroundView"), "_backdropView"), "_colorTintView").darkBackgroundColor = [UIColor clearColor];
   }
 
-  if (enabled && notifications) {
+  if (enabled && notifications && mainOverlayView.backgroundColor != nil) {
     [mainOverlayView setDuneEnabled:YES];
     [[headerContentView _titleLabel] setDuneEnabled:YES];
     [[headerContentView _dateLabel] setDuneEnabled:YES];
@@ -467,7 +484,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     if ([[[UIDevice currentDevice] systemVersion] compare:@"12.0" options:NSNumericSearch] == NSOrderedAscending) {
       [MSHookIvar<UIView *>(MSHookIvar<_UIBackdropView *>(MSHookIvar<UIView *>(self, "_backgroundView"), "_backdropView"), "_colorTintView") setDuneEnabled:YES];
     }
-  } else {
+  } else if (mainOverlayView.backgroundColor != nil) {
     [mainOverlayView setDuneEnabled:NO];
     [[headerContentView _titleLabel] setDuneEnabled:NO];
     [[headerContentView _dateLabel] setDuneEnabled:NO];
@@ -883,8 +900,8 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   if (!self.isObserving) {
     self.isObserving = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(duneToggled:) name:@"xyz.skitty.dune.update" object:nil];
-    [self duneToggled:nil];
   }
+  [self duneToggled:nil];
 }
 %new
 - (void)duneToggled:(NSNotification *)notification {
@@ -1109,7 +1126,7 @@ setStateName:@"dark"];
 %new
 - (void)updateStateAnimated:(bool)animated {
   if (!enabled) {
-    ((CCUILabeledRoundButton *)self.superview).subtitle = @"Light";
+    ((CCUILabeledRoundButton *)self.superview).subtitle = [localizeBundle localizedStringForKey:@"LIGHT" value:@"Light" table:nil];
     [self.packageView setStateName:@"light"];
     if (animated) {
       [UIView animateWithDuration:0.3 delay:0 options:nil animations:^{
@@ -1119,7 +1136,7 @@ setStateName:@"dark"];
       self.backgroundView.alpha = 1;
     }
   } else {
-    ((CCUILabeledRoundButton *)self.superview).subtitle = @"Dark";
+    ((CCUILabeledRoundButton *)self.superview).subtitle = [localizeBundle localizedStringForKey:@"DARK" value:@"Dark" table:nil];
     [self.packageView setStateName:@"dark"];
     if (animated) {
       [UIView animateWithDuration:0.3 delay:0 options:nil animations:^{
@@ -1152,12 +1169,12 @@ setStateName:@"dark"];
       [self.darkButton.buttonContainer addSubview:self.darkButton.buttonContainer.buttonView];
       self.darkButton.button = self.darkButton.buttonContainer.buttonView;
 
-      self.darkButton.title = @"Appearance";
+      self.darkButton.title = [localizeBundle localizedStringForKey:@"APPEARANCE" value:@"Appearance" table:nil];
       if (enabled) {
-        self.darkButton.subtitle = @"Dark";
+        self.darkButton.subtitle = [localizeBundle localizedStringForKey:@"DARK" value:@"Dark" table:nil];
         [((CCUIDuneButton *)self.darkButton.buttonContainer.buttonView).packageView setStateName:@"dark"];
       } else {
-        self.darkButton.subtitle = @"Light";
+        self.darkButton.subtitle = [localizeBundle localizedStringForKey:@"LIGHT" value:@"Light" table:nil];
         [((CCUIDuneButton *)self.darkButton.buttonContainer.buttonView).packageView setStateName:@"light"];
       }
       [self.darkButton setLabelsVisible:YES];
@@ -1165,8 +1182,10 @@ setStateName:@"dark"];
       [self.backgroundViewController.view addSubview:self.darkButton.buttonContainer];
     }
     [self.darkButton.buttonContainer updatePosition];
+    nightImage = self.backgroundViewController.nightShiftButton.buttonContainer.glyphImage;
     [self.backgroundViewController.nightShiftButton.buttonContainer updatePosition];
     if (self.backgroundViewController.trueToneButton) {
+      toneImage = self.backgroundViewController.trueToneButton.buttonContainer.glyphImage;
       [self.backgroundViewController.trueToneButton.buttonContainer updatePosition];
     }
     self.darkButton.buttonContainer.alpha = 1;
@@ -1188,7 +1207,7 @@ setStateName:@"dark"];
 - (void)updatePosition {
   self.centered = NO;
   CGPoint center;
-  if ([self.title isEqual:@"Appearance"]) {
+  if ([self.title isEqual: [localizeBundle localizedStringForKey:@"APPEARANCE" value:@"Appearance" table:nil]]) {
     if (ccBounds.size.width < ccBounds.size.height && !trueTone) {
       center.x = ccBounds.size.width/2-ccBounds.size.width*0.192;
       center.y = ccBounds.size.height-ccBounds.size.height*0.14;
@@ -1202,8 +1221,7 @@ setStateName:@"dark"];
       center.x = ccBounds.size.width-ccBounds.size.width*0.2;
       center.y = ccBounds.size.height/2-ccBounds.size.height*0.3;
     }
-  }
-  if ([self.title isEqual:@"Night Shift"]) {
+  } else if (self.glyphImage == nightImage) {
     if (ccBounds.size.width < ccBounds.size.height && !trueTone) {
       center.x = ccBounds.size.width/2+ ccBounds.size.width*0.192;
       center.y = ccBounds.size.height-ccBounds.size.height*0.14;
@@ -1217,8 +1235,7 @@ setStateName:@"dark"];
       center.x = ccBounds.size.width-ccBounds.size.width*0.2;
       center.y = ccBounds.size.height/2;
     }
-  }
-  if ([self.title isEqual:@"True Tone"]) {
+  } else if (trueTone && self.glyphImage == toneImage) {
     if (ccBounds.size.width < ccBounds.size.height) {
       center.x = ccBounds.size.width/2+ccBounds.size.width*0.29;
       center.y = ccBounds.size.height-ccBounds.size.height*0.14;
