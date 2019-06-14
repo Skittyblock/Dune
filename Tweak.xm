@@ -933,6 +933,37 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 }
 %end
 
+@interface SBFloatingDockPlatterView : UIView
+@property (nonatomic, assign) bool isObserving;
+@property (nonatomic, assign) long long lightStyle;
+- (void)duneToggled:(id)arg1;
+@end
+
+%hook SBFloatingDockPlatterView
+%property (nonatomic, assign) bool isObserving;
+%property (nonatomic, assign) long long lightStyle;
+- (void)layoutSubviews {
+  %orig;
+  if (!self.isObserving) {
+    self.isObserving = YES;
+    [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(duneToggled:) name:@"xyz.skitty.dune.update" object:nil];
+  }
+  [self duneToggled:nil];
+}
+%new
+- (void)duneToggled:(NSNotification *)notification {
+  _UIBackdropView *backgroundView = MSHookIvar<_UIBackdropView*>(self, "_backgroundView");
+  if (!self.lightStyle) {
+    self.lightStyle = backgroundView.style;
+  }
+  if (enabled && dock) {
+    [backgroundView transitionToStyle:2030];
+  } else {
+    [backgroundView transitionToStyle:self.lightStyle];
+  }
+}
+%end
+
 // 3D Touch Menus
 %hook SBUIIconForceTouchWrapperViewController
 %property (nonatomic, assign) bool isObserving;
@@ -1023,6 +1054,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   }
 }
 %end
+%end
 
 // Keyboard
 %hook UIKBRenderConfig
@@ -1033,7 +1065,6 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     %orig;
   }
 }
-%end
 %end
 
 // Control Center Toggle
@@ -1105,7 +1136,7 @@ setStateName:@"dark"];
 %property (nonatomic, retain) CCUILabeledRoundButtonViewController *darkButton;
 - (void)setExpanded:(bool)arg1 {
   %orig;
-  if (arg1 && [self.moduleIdentifier isEqual:@"com.apple.control-center.DisplayModule"]) {
+  if (arg1 && ([self.moduleIdentifier isEqual:@"com.apple.control-center.DisplayModule"] || [self.moduleIdentifier isEqual:@"com.jailbreak365.control-center.TinyDisplayModule"])) {
     ccBounds = self.view.bounds;
     if (self.backgroundViewController.trueToneButton) {
       trueTone = YES;
@@ -1210,6 +1241,7 @@ setStateName:@"dark"];
   CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, setDuneEnabled, CFSTR("xyz.skitty.dune.enabled"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
   CFNotificationCenterAddObserver(CFNotificationCenterGetDistributedCenter(), NULL, setDuneDisabled, CFSTR("xyz.skitty.dune.disabled"), NULL, CFNotificationSuspensionBehaviorDeliverImmediately);
 
+  %init;
   %init(Toggle);
 
   if ([[[NSBundle mainBundle] bundleIdentifier] isEqual:@"com.apple.springboard"]) {

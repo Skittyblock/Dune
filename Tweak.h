@@ -140,6 +140,7 @@ extern "C" {
 @end
 
 @interface _UIBackdropView : UIView
+@property (assign,nonatomic) long long style;
 - (void)transitionToStyle:(NSInteger)style;
 @end
 
