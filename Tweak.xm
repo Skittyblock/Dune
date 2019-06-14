@@ -27,6 +27,12 @@ static NSBundle *localizeBundle = [NSBundle bundleWithPath:@"/Library/Applicatio
 static void setDuneEnabled(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   enabled = YES;
   [[NSNotificationCenter defaultCenter] postNotificationName:@"xyz.skitty.dune.update" object:nil userInfo:nil];
+
+  NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
+  if (eclipsePreferences) {
+    [eclipsePreferences setValue:[NSNumber numberWithBool:YES] forKey:@"enabled"];
+    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:YES];
+  }
 }
 
 static void setDuneDisabled(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
@@ -36,7 +42,7 @@ static void setDuneDisabled(CFNotificationCenterRef center, void *observer, CFSt
   NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
   if (eclipsePreferences) {
     [eclipsePreferences setValue:[NSNumber numberWithBool:NO] forKey:@"enabled"];
-    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:TRUE];
+    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:YES];
   }
 }
 
@@ -46,12 +52,6 @@ static void duneEnabled() {
 
 static void duneDisabled() {
   CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("xyz.skitty.dune.disabled"), nil, nil, true);
-
-  NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
-  if (eclipsePreferences) {
-    [eclipsePreferences setValue:[NSNumber numberWithBool:NO] forKey:@"enabled"];
-    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:NO];
-  }
 }
 
 // Preference Updates
@@ -900,8 +900,8 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   if (!self.isObserving) {
     self.isObserving = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(duneToggled:) name:@"xyz.skitty.dune.update" object:nil];
+    [self duneToggled:nil];
   }
-  [self duneToggled:nil];
 }
 %new
 - (void)duneToggled:(NSNotification *)notification {
