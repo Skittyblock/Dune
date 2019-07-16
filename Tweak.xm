@@ -908,8 +908,8 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   if (!self.isObserving) {
     self.isObserving = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(duneToggled:) name:@"xyz.skitty.dune.update" object:nil];
+    [self duneToggled:nil];
   }
-  [self duneToggled:nil];
 }
 %new
 - (void)duneToggled:(NSNotification *)notification {
