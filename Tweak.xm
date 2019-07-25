@@ -23,23 +23,22 @@ static UIImage *toneImage;
 
 static NSBundle *localizeBundle = [NSBundle bundleWithPath:@"/Library/Application Support/Dune/Localization.bundle"];
 
-static void toggleRelatedDarkModeTweaks(bool setOn){
+static void toggleRelatedDarkModeTweaks(bool setOn) {
   NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
   if (eclipsePreferences) {
-    [eclipsePreferences setValue:[NSNumber numberWithBool:setOn] forKey:@"enabled"];
-    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:TRUE];
+    CFPreferencesSetAppValue((CFStringRef)@"enabled", (CFPropertyListRef)[NSNumber numberWithBool:setOn], CFSTR("com.gmoran.eclipse"));
   }
 
-  NSArray* foxfortTweaks = @[@"amazonite",@"facebookdarkmode",@"deluminator",@"fbdarkadmin",@"darkgmaps",@"darksounds",@"gmailmidnight",@"nightmaps"];
-  for (NSString*tweak in foxfortTweaks){
-    NSString* plistPath = [NSString stringWithFormat:@"/var/mobile/Library/Preferences/com.foxfort.%@settings.plist", tweak];
+  NSArray *foxfortTweaks = @[@"amazonite", @"facebookdarkmode", @"deluminator", @"fbdarkadmin", @"darkgmaps", @"darksounds", @"gmailmidnight", @"nightmaps"];
+  for (NSString *tweak in foxfortTweaks){
+    NSString *plistPath = [NSString stringWithFormat:@"/var/mobile/Library/Preferences/com.foxfort.%@settings.plist", tweak];
     NSMutableDictionary *tweakPreferences = [NSMutableDictionary dictionaryWithContentsOfFile:plistPath];
-    if (tweakPreferences){
-      [tweakPreferences setValue:[NSNumber numberWithBool:setOn] forKey:@"enabled"];
-      [tweakPreferences writeToFile:plistPath atomically:TRUE];
+    if (tweakPreferences) {
+      CFPreferencesSetAppValue((CFStringRef)@"enabled", (CFPropertyListRef)[NSNumber numberWithBool:setOn], (CFStringRef)[NSString stringWithFormat:@"com.foxfort.%@settings.plist", tweak]);
     }
   }
 }
+
 // Toggle Notifications
 static void setDuneEnabled(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   enabled = YES;
