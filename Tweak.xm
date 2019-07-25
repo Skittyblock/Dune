@@ -23,28 +23,36 @@ static UIImage *toneImage;
 
 static NSBundle *localizeBundle = [NSBundle bundleWithPath:@"/Library/Application Support/Dune/Localization.bundle"];
 
+static void toggleRelatedDarkModeTweaks(bool setOn){
+  NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
+  if (eclipsePreferences) {
+    [eclipsePreferences setValue:[NSNumber numberWithBool:setOn] forKey:@"enabled"];
+    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:TRUE];
+  }
+
+  NSArray* foxfortTweaks = @[@"amazonite",@"facebookdarkmode",@"deluminator",@"fbdarkadmin",@"darkgmaps",@"darksounds",@"gmailmidnight",@"nightmaps"];
+  for (NSString*tweak in foxfortTweaks){
+    NSString* plistPath = [NSString stringWithFormat:@"/var/mobile/Library/Preferences/com.foxfort.%@settings.plist", tweak];
+    NSMutableDictionary *tweakPreferences = [NSMutableDictionary dictionaryWithContentsOfFile:plistPath];
+    if (tweakPreferences){
+      [tweakPreferences setValue:[NSNumber numberWithBool:setOn] forKey:@"enabled"];
+      [tweakPreferences writeToFile:plistPath atomically:TRUE];
+    }
+  }
+}
 // Toggle Notifications
 static void setDuneEnabled(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   enabled = YES;
   [[NSNotificationCenter defaultCenter] postNotificationName:@"xyz.skitty.dune.update" object:nil userInfo:nil];
-
-  NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
-  if (eclipsePreferences) {
-    [eclipsePreferences setValue:[NSNumber numberWithBool:YES] forKey:@"enabled"];
-    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:YES];
-  }
+  toggleRelatedDarkModeTweaks(enabled);
 }
 
 static void setDuneDisabled(CFNotificationCenterRef center, void *observer, CFStringRef name, const void *object, CFDictionaryRef userInfo) {
   enabled = NO;
   [[NSNotificationCenter defaultCenter] postNotificationName:@"xyz.skitty.dune.update" object:nil userInfo:nil];
-
-  NSMutableDictionary *eclipsePreferences = [NSMutableDictionary dictionaryWithDictionary:[NSDictionary dictionaryWithContentsOfFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist"]];
-  if (eclipsePreferences) {
-    [eclipsePreferences setValue:[NSNumber numberWithBool:NO] forKey:@"enabled"];
-    [eclipsePreferences writeToFile:@"/var/mobile/Library/Preferences/com.gmoran.eclipse.plist" atomically:YES];
-  }
+  toggleRelatedDarkModeTweaks(enabled);
 }
+
 
 static void duneEnabled() {
   CFNotificationCenterPostNotification(CFNotificationCenterGetDistributedCenter(), CFSTR("xyz.skitty.dune.enabled"), nil, nil, true);
