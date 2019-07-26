@@ -85,6 +85,7 @@ extern "C" {
 @interface SBFolderBackgroundView : UIView
 @property (nonatomic, assign) bool isObserving;
 @property (nonatomic, retain) NSArray *lightSubviews;
+@property (nonatomic, retain) UIVisualEffectView *darkOverlayView;
 @property (nonatomic, retain) UIVisualEffectView *darkBlurView;
 @property (nonatomic, retain) UIVisualEffectView *lightBlurView;
 - (void)duneToggled:(id)arg1;
@@ -93,6 +94,7 @@ extern "C" {
 @interface SBFolderIconImageView : UIImageView
 @property (nonatomic, assign) bool isObserving;
 @property (nonatomic, retain) SBWallpaperEffectView *darkBackgroundView;
+@property (nonatomic, retain) UIView *darkOverlayView;
 - (void)duneToggled:(id)arg1;
 @end
 
@@ -103,6 +105,18 @@ extern "C" {
 @property (nonatomic, assign) bool isObserving;
 - (void)duneToggled:(id)arg1;
 - (UIView *)iconBackgroundView;
+@end
+
+@interface SBDockView : UIView
+@property (nonatomic, assign) bool isObserving;
+@property (nonatomic, retain) UIView *darkOverlayView;
+- (void)duneToggled:(id)arg1;
+@end
+
+@interface SBFloatingDockPlatterView : UIView
+@property (nonatomic, assign) bool isObserving;
+@property (nonatomic, assign) long long lightStyle;
+- (void)duneToggled:(id)arg1;
 @end
 
 @interface UIKBRenderConfig : UIView
@@ -129,10 +143,6 @@ extern "C" {
 @end
 
 @interface MTVibrantStylingProvider : NSObject
-@end
-
-@interface MTSystemPlatterMaterialSettings : NSObject
-@property (nonatomic, assign) UIColor *tintColor;
 @end
 
 @interface _UIBackdropView : UIView

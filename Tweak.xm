@@ -423,18 +423,18 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 
   if (mainOverlayView.backgroundColor != nil) {
     if (enabled && notifications && arg1 == YES ) {
-      UIColor *blackColor = [UIColor colorWithWhite:0.0 alpha:0.4];
+      UIColor *blackColor = [UIColor colorWithWhite:0.0 alpha:0.34];
       if (mode == 1) {
-        blackColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+        blackColor = [UIColor colorWithWhite:0.0 alpha:0.44];
       } else if (mode == 2) {
         blackColor = [UIColor colorWithWhite:0.0 alpha:0.9];
       }
       mainOverlayView.backgroundColor = blackColor;
     }
     if (enabled && notifications && arg1 == NO) {
-      UIColor *blackColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+      UIColor *blackColor = [UIColor colorWithWhite:0.0 alpha:0.44];
       if (mode == 1) {
-        blackColor = [UIColor colorWithWhite:0.0 alpha:0.6];
+        blackColor = [UIColor colorWithWhite:0.0 alpha:0.54];
       } else if (mode == 2) {
         blackColor = [UIColor colorWithWhite:0.0 alpha:1.0];
       }
@@ -449,9 +449,9 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   NCNotificationContentView *notificationContentView = MSHookIvar<NCNotificationContentView *>(self, "_notificationContentView");
 
   UIColor *whiteColor = [UIColor whiteColor];
-  UIColor *blackColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+  UIColor *blackColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   if (mode == 1) {
-    blackColor = [UIColor colorWithWhite:0.0 alpha:0.6];
+    blackColor = [UIColor colorWithWhite:0.0 alpha:0.54];
   } else if (mode == 2) {
     blackColor = [UIColor colorWithWhite:0.0 alpha:1.0];
   }
@@ -527,11 +527,11 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   MTPlatterHeaderContentView *headerContentView = [self _headerContentView];
 
   UIColor *whiteColor = [UIColor whiteColor];
-  UIColor *headColor = [UIColor colorWithWhite:0.0 alpha:0.6];
-  UIColor *mainColor = [UIColor colorWithWhite:0.0 alpha:0.5];
+  UIColor *headColor = [UIColor colorWithWhite:0.0 alpha:0.44];
+  UIColor *mainColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   if (mode == 1) {
     headColor = [UIColor colorWithWhite:0.0 alpha:0.7];
-    mainColor = [UIColor colorWithWhite:0.0 alpha:0.6];
+    mainColor = [UIColor colorWithWhite:0.0 alpha:0.54];
   } else if (mode == 2) {
     headColor = [UIColor blackColor];
     mainColor = [UIColor blackColor];
@@ -850,6 +850,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 %hook SBFolderBackgroundView
 %property (nonatomic, assign) bool isObserving;
 %property (nonatomic, retain) NSArray *lightSubviews;
+%property (nonatomic, retain) UIVisualEffectView *darkOverlayView;
 %property (nonatomic, retain) UIVisualEffectView *darkBlurView;
 %property (nonatomic, retain) UIVisualEffectView *lightBlurView;
 - (void)layoutSubviews {
@@ -864,20 +865,29 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 - (void)duneToggled:(NSNotification *)notification {
   if (!self.lightSubviews) {
     self.lightSubviews = self.subviews;
-    self.lightBlurView = MSHookIvar<UIVisualEffectView*>(self, "_blurView");
+    self.lightBlurView = MSHookIvar<UIVisualEffectView *>(self, "_blurView");
+
     self.darkBlurView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleDark]];
-    self.darkBlurView.frame = self.bounds;
-    self.darkBlurView.alpha = 0;
+    self.darkBlurView.frame = [UIScreen mainScreen].bounds;
+
+    self.darkOverlayView = [[UIVisualEffectView alloc] initWithEffect:[UIBlurEffect effectWithStyle:UIBlurEffectStyleRegular]];
+    self.darkOverlayView.frame = [UIScreen mainScreen].bounds;
   }
   if (enabled && folders) {
     [[self subviews] makeObjectsPerformSelector:@selector(removeFromSuperview)];
     [self addSubview:self.darkBlurView];
-    if (mode == 2) {
-      self.darkBackgroundColor = [UIColor blackColor];
-      [self setDuneEnabled:YES];
-    } else {
-      MSHookIvar<UIVisualEffectView *>(self, "_blurView") = self.darkBlurView;
-      self.darkBlurView.alpha = 1;
+    [self.darkBlurView.contentView addSubview:self.darkOverlayView];
+
+    MSHookIvar<UIVisualEffectView *>(self, "_blurView") = self.darkBlurView;
+    self.darkBlurView.alpha = 1;
+    self.darkOverlayView.alpha = 1;
+
+    if (mode == 0) {
+      self.darkOverlayView.subviews[1].backgroundColor = [UIColor clearColor];
+    } else if (mode == 1) {
+      self.darkOverlayView.subviews[1].backgroundColor = [UIColor colorWithWhite:0 alpha:0.1];
+    } else if (mode == 2) {
+      self.darkOverlayView.subviews[1].backgroundColor = [UIColor blackColor];
     }
   } else {
     if (!self.subviews) {
@@ -887,6 +897,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     }
     MSHookIvar<UIVisualEffectView *>(self, "_blurView") = self.lightBlurView;
     self.darkBlurView.alpha = 0;
+    self.darkOverlayView.alpha = 0;
     [self setDuneEnabled:NO];
   }
 }
@@ -902,66 +913,93 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 %hook SBFolderIconImageView
 %property (nonatomic, assign) bool isObserving;
 %property (nonatomic, retain) SBWallpaperEffectView *darkBackgroundView;
+%property (nonatomic, retain) UIView *darkOverlayView;
 - (void)layoutSubviews {
   %orig;
   if (!self.isObserving) {
     self.isObserving = YES;
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(duneToggled:) name:@"xyz.skitty.dune.update" object:nil];
-    [self duneToggled:nil];
   }
+  [self duneToggled:nil];
 }
 %new
 - (void)duneToggled:(NSNotification *)notification {
   if (!self.darkBackgroundView) {
-    UIView *backgroundView = MSHookIvar<UIView*>(self, "_backgroundView");
+    UIView *backgroundView = MSHookIvar<UIView *>(self, "_backgroundView");
     self.darkBackgroundView = [[%c(SBWallpaperEffectView) alloc] initWithWallpaperVariant:1];
     [self.darkBackgroundView setFrame:backgroundView.bounds];
-    [self.darkBackgroundView setStyle:14];
-    self.darkBackgroundView.backgroundColor = [UIColor blackColor];
+    [self.darkBackgroundView setStyle:27];
     self.darkBackgroundView.alpha = 1;
     self.darkBackgroundView.layer.cornerRadius = backgroundView.layer.cornerRadius;
     self.darkBackgroundView.layer.masksToBounds = backgroundView.layer.masksToBounds;
     [backgroundView addSubview:self.darkBackgroundView];
+
+    self.darkOverlayView = [[UIView alloc] initWithFrame:backgroundView.bounds];
+    self.darkOverlayView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.2];
+    self.darkOverlayView.alpha = 1;
+    self.darkOverlayView.layer.cornerRadius = backgroundView.layer.cornerRadius;
+    self.darkOverlayView.layer.masksToBounds = backgroundView.layer.masksToBounds;
+    [backgroundView addSubview:self.darkOverlayView];
   }
-  if (enabled && folders && mode != 2) {
-    self.darkBackgroundView.alpha = 1;
-    [self.darkBackgroundView setStyle:14];
-  } else if (enabled && folders && mode == 2) {
-    self.darkBackgroundView.alpha = 1;
-    [self.darkBackgroundView setStyle:0];
+  if (enabled && folders) {
+    if (mode == 0) {
+      self.darkOverlayView.alpha = 1;
+      self.darkBackgroundView.alpha = 1;
+      self.darkOverlayView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.2];
+      [self.darkBackgroundView setStyle:27];
+    } else if (mode == 1) {
+      self.darkOverlayView.alpha = 0;
+      self.darkBackgroundView.alpha = 1;
+      [self.darkBackgroundView setStyle:14];
+    } else if (mode == 2) {
+      self.darkOverlayView.alpha = 0;
+      self.darkBackgroundView.alpha = 1;
+      [self.darkBackgroundView setStyle:2];
+    }
   } else {
+    self.darkOverlayView.alpha = 0;
     self.darkBackgroundView.alpha = 0;
   }
 }
 %end
 
 // Dock
-%hook SBWallpaperEffectView
+%hook SBDockView
+%property (nonatomic, assign) bool isObserving;
+%property (nonatomic, retain) UIView *darkOverlayView;
 - (void)layoutSubviews {
   %orig;
-  if ([self.superview isKindOfClass:%c(SBDockView)]) {
+  if (!self.isObserving) {
     [[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(duneToggled:) name:@"xyz.skitty.dune.update" object:nil];
     [self duneToggled:nil];
   }
 }
 %new
 - (void)duneToggled:(NSNotification *)notification {
-  if (enabled && dock && mode != 2) {
-    self.wallpaperStyle = 14;
-  } else if (enabled && dock && mode == 2) {
-    self.wallpaperStyle = 0;
-    self.backgroundColor = [UIColor blackColor];
+  SBWallpaperEffectView *backgroundView = MSHookIvar<SBWallpaperEffectView *>(self, "_backgroundView");
+  if (!self.darkOverlayView) {
+  	self.darkOverlayView = [[UIView alloc] initWithFrame:CGRectMake(0, 0, [UIScreen mainScreen].bounds.size.width*2, [UIScreen mainScreen].bounds.size.height)];
+    self.darkOverlayView.backgroundColor = [UIColor colorWithWhite:0 alpha:0.2];
+    self.darkOverlayView.alpha = 1;
+    [backgroundView addSubview:self.darkOverlayView];
+  }
+  if (enabled && dock) {
+    if (mode == 0) {
+      self.darkOverlayView.alpha = 1;
+      backgroundView.wallpaperStyle = 27;
+    } else if (mode == 1) {
+      self.darkOverlayView.alpha = 0;
+      backgroundView.wallpaperStyle = 14;
+    } else if (mode == 2) {
+      self.darkOverlayView.alpha = 0;
+      backgroundView.wallpaperStyle = 2;
+    }
   } else {
-    self.wallpaperStyle = 12;
+    self.darkOverlayView.alpha = 0;
+    backgroundView.wallpaperStyle = 12;
   }
 }
 %end
-
-@interface SBFloatingDockPlatterView : UIView
-@property (nonatomic, assign) bool isObserving;
-@property (nonatomic, assign) long long lightStyle;
-- (void)duneToggled:(id)arg1;
-@end
 
 %hook SBFloatingDockPlatterView
 %property (nonatomic, assign) bool isObserving;
