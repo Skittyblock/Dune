@@ -384,7 +384,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
 %new
 - (void)duneToggled:(NSNotification *)notification {
   if (!self.layer.darkFilters) {
-    CAFilter* filter = [CAFilter filterWithName:@"colorInvert"];
+    CAFilter* filter = [CAFilter filterWithName:@"vibrantDark"];
     [filter setDefaults];
     [[self layer] setDarkFilters:[NSArray arrayWithObject:filter]];
   }
@@ -526,7 +526,6 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   UIView *mainOverlayView = MSHookIvar<UIView *>(self, "_mainOverlayView");
   MTPlatterHeaderContentView *headerContentView = [self _headerContentView];
 
-  UIColor *whiteColor = [UIColor whiteColor];
   UIColor *headColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   UIColor *mainColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   if (mode == 1) {
@@ -544,17 +543,17 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     MSHookIvar<UIView *>(MSHookIvar<_UIBackdropView *>(MSHookIvar<UIView *>(self, "_backgroundView"), "_backdropView"), "_colorTintView").darkBackgroundColor = [UIColor clearColor];
   }
 
+  [[[headerContentView _titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
+  if ([self showMoreButton]) {
+    [[[[self showMoreButton] titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
+  }
+
   if (enabled && widgets) {
     [headerOverlayView setDuneEnabled:YES];
     [mainOverlayView setDuneEnabled:YES];
-    [[[headerContentView _titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
     [[[headerContentView _titleLabel] layer] setDuneEnabled:YES];
-    [[headerContentView _titleLabel] setDarkTextColor:whiteColor];
-    [[headerContentView _titleLabel] setDuneEnabled:YES];
     if ([self showMoreButton]) {
-      [[[[self showMoreButton] titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
       [[[[self showMoreButton] titleLabel] layer] setDuneEnabled:YES];
-      [[self showMoreButton] setTitleColor:whiteColor forState:UIControlStateNormal];
     }
     if ([[[UIDevice currentDevice] systemVersion] compare:@"12.0" options:NSNumericSearch] == NSOrderedAscending) {
       [MSHookIvar<UIView *>(MSHookIvar<_UIBackdropView *>(MSHookIvar<UIView *>(self, "_backgroundView"), "_backdropView"), "_colorTintView") setDuneEnabled:YES];
@@ -562,7 +561,6 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   } else {
     [headerOverlayView setDuneEnabled:NO];
     [mainOverlayView setDuneEnabled:NO];
-    [[headerContentView _titleLabel] setDuneEnabled:NO];
     [[[headerContentView _titleLabel] layer] setDuneEnabled:NO];
     if ([self showMoreButton]) {
       [[[[self showMoreButton] titleLabel] layer] setDuneEnabled:NO];
@@ -645,19 +643,19 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     if([view isKindOfClass:%c(PLPlatterView)]) {
       UIView *mainOverlayView = MSHookIvar<UIView *>(view, "_mainOverlayView");
       count++;
-      if (count == 1) {
-        mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.24];
+      if (count == 1 && self.subviews.count > 2) {
+        mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.46];
         if (mode == 1) {
-          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.34];
+          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.56];
         } else if (mode == 2) {
-          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.84];
+          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.9];
         }
-      } else if (count == 2) {
-        mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.34];
+      } else if (count == 2 || self.subviews.count == 2) {
+        mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.45];
         if (mode == 1) {
-          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.44];
+          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.55];
         } else if (mode == 2) {
-          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.94];
+          mainOverlayView.darkAlpha = [NSNumber numberWithFloat:0.95];
         }
       }
       mainOverlayView.darkBackgroundColor = [UIColor blackColor];
