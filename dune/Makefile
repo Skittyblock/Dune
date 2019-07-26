@@ -4,6 +4,7 @@ ARCHS = arm64 arm64e
 include $(THEOS)/makefiles/common.mk
 
 BUNDLE_NAME = Dune
+Dune_CFLAGS = -fobjc-arc
 Dune_FILES = DUNERootListController.m
 Dune_INSTALL_PATH = /Library/PreferenceBundles
 Dune_PRIVATE_FRAMEWORKS = Preferences
