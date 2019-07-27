@@ -526,6 +526,7 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   UIView *mainOverlayView = MSHookIvar<UIView *>(self, "_mainOverlayView");
   MTPlatterHeaderContentView *headerContentView = [self _headerContentView];
 
+  UIColor *whiteColor = [UIColor whiteColor];
   UIColor *headColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   UIColor *mainColor = [UIColor colorWithWhite:0.0 alpha:0.44];
   if (mode == 1) {
@@ -543,16 +544,20 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     MSHookIvar<UIView *>(MSHookIvar<_UIBackdropView *>(MSHookIvar<UIView *>(self, "_backgroundView"), "_backdropView"), "_colorTintView").darkBackgroundColor = [UIColor clearColor];
   }
 
+  [[headerContentView _titleLabel] setDarkTextColor:whiteColor];
   [[[headerContentView _titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
   if ([self showMoreButton]) {
+    [[[self showMoreButton] titleLabel] setDarkTextColor:whiteColor];
     [[[[self showMoreButton] titleLabel] layer] setDarkFilters:[[NSArray alloc] init]];
   }
 
   if (enabled && widgets) {
     [headerOverlayView setDuneEnabled:YES];
     [mainOverlayView setDuneEnabled:YES];
+    [[headerContentView _titleLabel] setDuneEnabled:YES];
     [[[headerContentView _titleLabel] layer] setDuneEnabled:YES];
     if ([self showMoreButton]) {
+      [[[self showMoreButton] titleLabel] setDuneEnabled:YES];
       [[[[self showMoreButton] titleLabel] layer] setDuneEnabled:YES];
     }
     if ([[[UIDevice currentDevice] systemVersion] compare:@"12.0" options:NSNumericSearch] == NSOrderedAscending) {
@@ -561,8 +566,10 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
   } else {
     [headerOverlayView setDuneEnabled:NO];
     [mainOverlayView setDuneEnabled:NO];
+    [[headerContentView _titleLabel] setDuneEnabled:NO];
     [[[headerContentView _titleLabel] layer] setDuneEnabled:NO];
     if ([self showMoreButton]) {
+      [[[self showMoreButton] titleLabel] setDuneEnabled:NO];
       [[[[self showMoreButton] titleLabel] layer] setDuneEnabled:NO];
     }
     if ([[[UIDevice currentDevice] systemVersion] compare:@"12.0" options:NSNumericSearch] == NSOrderedAscending) {
@@ -1017,7 +1024,13 @@ static void PreferencesChangedCallback(CFNotificationCenterRef center, void *obs
     self.lightStyle = backgroundView.style;
   }
   if (enabled && dock) {
-    [backgroundView transitionToStyle:2030];
+    if (mode == 0) {
+      [backgroundView transitionToStyle:4005];
+    } else if (mode == 1) {
+      [backgroundView transitionToStyle:2030];
+    } else {
+      [backgroundView transitionToStyle:4008];
+    }
   } else {
     [backgroundView transitionToStyle:self.lightStyle];
   }

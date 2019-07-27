@@ -1,7 +1,7 @@
 Package: com.skitty.dune
 Name: Dune
 Depends: mobilesubstrate, preferenceloader
-Version: 1.2
+Version: 1.2.1
 Architecture: iphoneos-arm
 Description: A free, open-source iOS dark mode.
 Depiction: https://skitty.xyz/repo/depictions/?p=com.skitty.dune
