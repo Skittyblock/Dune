@@ -33,7 +33,7 @@
 }
 
 - (CGFloat)preferredHeightForWidth:(CGFloat)arg1 {
-  return -150.0;
+  return 150.0;
 }
 @end
 
